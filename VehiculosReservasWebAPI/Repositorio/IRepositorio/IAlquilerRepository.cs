@@ -12,7 +12,6 @@ namespace VehiculosReservasWebAPI.Repositorio.IRepositorio
         Task<IEnumerable<AlquilerListadoDto>> ListadoAlquiler();
         Task<decimal> TraerPrecioSegunTipoAlquiler(int idOpcionAlquiler, int idVehiculo, DateTime fechaInicio, DateTime fechaFin);
         bool VehiculoTieneReservaFutura(int idVehiculo, DateTime fechaFin, int idAlquiler);
-        // Task<decimal> TraerRetraso(int idVehiculo, int idTipoAlquiler, DateTime fechaFin, DateTime? fechaEntrega);
         Task<decimal?> TraerRetraso(int idVehiculo, int idTipoAlquiler, DateTime fechaFin, DateTime? fechaEntrega);
     }
 }

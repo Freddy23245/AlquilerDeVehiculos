@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using VehiculosReservasWebAPI.Data;
 using VehiculosReservasWebAPI.Models;
 using VehiculosReservasWebAPI.Repositorio.IRepositorio;
 using VehiculosReservasWebAPI.Services.IService;

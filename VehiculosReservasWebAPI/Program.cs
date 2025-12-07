@@ -6,7 +6,8 @@ using VehiculosReservasWebAPI.Services;
 using VehiculosReservasWebAPI.Services.IService;
 using AutoMapper;
 using Microsoft.Extensions.DependencyInjection;
-using VehiculosReservasWebAPI.Data;
+using VehiculosReservasWebAPI.Models;
+
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<ReservasCocheraContext>(

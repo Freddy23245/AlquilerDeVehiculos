@@ -40,7 +40,7 @@ namespace VehiculosReservasWebAPI.Controllers
             {
                 var modeloAlq = _mapper.Map<Alquiler>(NuevoAlquiler);
 
-                var resultado = await _AlquilerRepository2.TraerPrecioSegunTipoAlquiler((int)NuevoAlquiler.IdOpcionAlquiler, NuevoAlquiler.IdVehiculo, NuevoAlquiler.FechaInicio, NuevoAlquiler.FechaFin);
+                var resultado = await _AlquilerRepository2.TraerPrecioSegunTipoAlquiler((int)NuevoAlquiler.IdOpcionAlquiler, NuevoAlquiler.IdVehiculo, NuevoAlquiler.FechaInicio, NuevoAlquiler.FechaFin); // cantidad dia (Fecha Inicio + FechaFin ) * precio
                 modeloAlq.Costo = resultado;
                 modeloAlq.FechaEntrega = null;
 

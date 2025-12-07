@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Security;
-using VehiculosReservasWebAPI.Data;
+using VehiculosReservasWebAPI.Models;
 using VehiculosReservasWebAPI.Models.Dto.DtoAbm;
 using VehiculosReservasWebAPI.Models.Dto.DtoViews;
 using VehiculosReservasWebAPI.Repositorio.IRepositorio;
@@ -36,13 +36,14 @@ namespace VehiculosReservasWebAPI.Repositorio
 
             return listado;
         }
+
         //public async Task<decimal> TraerPrecioSegunTipoAlquiler(int idTipoAlquiler, int idVehiculo, DateTime fechaInicio, DateTime fechaFin)
         //{
         //    var hoy = DateOnly.FromDateTime(DateTime.Today);
 
         //    // Traemos de una sola vez el tipo de alquiler y el precio vigente del vehículo
         //    var tipoAlquiler = await _context.OpcionAlquilers
-        //        .Where(x => x.IdOpcionAlquiler == idTipoAlquiler && x.Habilitado == true)
+        //        .Where(x => x.IdOpcionAlquiler == idTipoAlquiler && x.Habilitado== true)
         //        .FirstOrDefaultAsync();
 
         //    if (tipoAlquiler == null)
@@ -58,21 +59,24 @@ namespace VehiculosReservasWebAPI.Repositorio
         //        throw new InvalidOperationException("No existe un precio vigente para este vehículo");
 
         //    TimeSpan diferencia = fechaFin - fechaInicio;
+        //    var totalDia = diferencia.TotalDays < 0 ? 0 : diferencia.TotalDays;
+        //    var totalHoras = diferencia.TotalHours < 0 ? 0 : diferencia.TotalHours;
 
         //    return tipoAlquiler.IdOpcionAlquiler switch
         //    {
-        //        1 => precioAlquiler.PrecioPorDia * (decimal)Math.Ceiling(diferencia.TotalDays),   // días completos
-        //        2 => (decimal)precioAlquiler.PrecioPorHora * (decimal)diferencia.TotalHours,      // horas decimales
+        //        1 => precioAlquiler.PrecioPorDia * (decimal)totalDia,   // días fraccionados exactos
+        //        2 => (decimal)precioAlquiler.PrecioPorHora * (decimal)totalHoras, // horas exactas
         //        _ => throw new ArgumentException("Opción de alquiler inválida")
         //    };
         //}
+
         public async Task<decimal> TraerPrecioSegunTipoAlquiler(int idTipoAlquiler, int idVehiculo, DateTime fechaInicio, DateTime fechaFin)
         {
             var hoy = DateOnly.FromDateTime(DateTime.Today);
-
+            decimal resultado = 0;
             // Traemos de una sola vez el tipo de alquiler y el precio vigente del vehículo
             var tipoAlquiler = await _context.OpcionAlquilers
-                .Where(x => x.IdOpcionAlquiler == idTipoAlquiler && x.Habilitado== true)
+                .Where(x => x.IdOpcionAlquiler == idTipoAlquiler && x.Habilitado == true)
                 .FirstOrDefaultAsync();
 
             if (tipoAlquiler == null)
@@ -87,16 +91,12 @@ namespace VehiculosReservasWebAPI.Repositorio
             if (precioAlquiler == null)
                 throw new InvalidOperationException("No existe un precio vigente para este vehículo");
 
-            TimeSpan diferencia = fechaFin - fechaInicio;
-            var totalDia = diferencia.TotalDays < 0 ? 0 : diferencia.TotalDays;
-            var totalHoras = diferencia.TotalHours < 0 ? 0 : diferencia.TotalHours;
+            if (tipoAlquiler.IdOpcionAlquiler == 1)//dia
+              return  resultado = CalcularPrecioPorDia(precioAlquiler.PrecioPorDia, fechaInicio, fechaFin);
+            if (tipoAlquiler.IdOpcionAlquiler == 2)//hora
+              return  resultado = CalcularPrecioPorHora((decimal)precioAlquiler.PrecioPorHora, fechaInicio, fechaFin);
 
-            return tipoAlquiler.IdOpcionAlquiler switch
-            {
-                1 => precioAlquiler.PrecioPorDia * (decimal)totalDia,   // días fraccionados exactos
-                2 => (decimal)precioAlquiler.PrecioPorHora * (decimal)totalHoras, // horas exactas
-                _ => throw new ArgumentException("Opción de alquiler inválida")
-            };
+            return resultado;
         }
 
         public bool ExisteSuperposicion(int idVehiculo, DateTime nuevaFechaInicio, DateTime nuevaFechaFin)
@@ -146,22 +146,19 @@ namespace VehiculosReservasWebAPI.Repositorio
             );
         }
 
-        public  int CalcularDiasRetraso(DateTime fechaFin, DateTime? fechaEntrega)
+        public int CalcularDiasRetraso(DateTime fechaFin, DateTime? fechaEntrega)
         {
             if (!fechaEntrega.HasValue)
                 return 0; // No se entregó aún, no se puede calcular
 
             int diasRetraso = (int)Math.Ceiling((fechaEntrega.Value - fechaFin).TotalDays);
-            return diasRetraso > 0 ? diasRetraso : 0;
-        }
-
-        public static decimal CalcularRecargo(decimal precioPorDia, int diasRetraso, decimal porcentajeRecargo = 0.1m)
-        {
-            return diasRetraso * (precioPorDia * porcentajeRecargo);
+            //return diasRetraso > 0 ? diasRetraso : 0;
+            return diasRetraso;
         }
 
         public async Task<decimal?> TraerRetraso(int idVehiculo, int idTipoAlquiler, DateTime fechaFin, DateTime? fechaEntrega)
         {
+            decimal recargo = 0;
             if (!fechaEntrega.HasValue)
                 return 0m;
 
@@ -182,22 +179,49 @@ namespace VehiculosReservasWebAPI.Repositorio
 
             if (precioAlquiler == null)
                 throw new InvalidOperationException("No existe un precio vigente para este vehículo");
+           
+            if (tipoAlquiler.IdOpcionAlquiler == 1)//dia
+                return recargo = CalcularPrecioPorDia(precioAlquiler.PrecioPorDia, fechaFin, (DateTime)fechaEntrega);
+            if (tipoAlquiler.IdOpcionAlquiler == 2)//hora
+                return recargo = CalcularPrecioPorHora((decimal)precioAlquiler.PrecioPorHora, fechaFin, (DateTime)fechaEntrega);
 
-            // Diferencia entre fecha de entrega y fecha fin del alquiler
-            var diferencia = fechaEntrega.Value - fechaFin;
-            var cantidadDias = diferencia.TotalDays <0 ? 0 :diferencia.TotalDays ;
-            var cantHoras = diferencia.TotalHours < 0 ? 0: diferencia.TotalHours;
-            // Calculamos el recargo (puede ser negativo si se devuelve antes)
-            decimal recargo = tipoAlquiler.IdOpcionAlquiler switch
-            {
-                1 => precioAlquiler.PrecioPorDia *(decimal) cantidadDias,   // por día
-                2 => (decimal)precioAlquiler.PrecioPorHora * (decimal)cantHoras ,// por hora
-                _ => throw new ArgumentException("Tipo de alquiler inválido")
-            };
-
-            return recargo;
+            return recargo;//falta verificar la sobrecarga del dato
         }
 
+        public decimal CalcularPrecioPorDia(decimal precioPorDia, DateTime fechaInicio, DateTime fechaFin)
+        {
+            // Validación básica
+            if (fechaFin < fechaInicio)
+                throw new ArgumentException("La fecha de fin no puede ser anterior a la fecha de inicio.");
+
+            // Calculamos la diferencia de días exacta
+            TimeSpan diferencia = fechaFin - fechaInicio;
+
+            // Redondeamos hacia arriba para cobrar días completos
+            int cantidadDias = (int)Math.Ceiling(diferencia.TotalDays);
+
+            // Calculamos el precio total
+            decimal precioTotal = precioPorDia * cantidadDias;
+
+            return precioTotal;
+        }
+
+
+        public decimal CalcularPrecioPorHora(decimal precioPorHora, DateTime fechaInicio, DateTime fechaFin)
+        {
+            // Validación básica
+            //if (fechaFin < fechaInicio)
+            //    throw new ArgumentException("La fecha de fin no puede ser anterior a la fecha de inicio.");
+
+            // Calculamos la diferencia exacta en horas
+            TimeSpan diferencia = fechaFin - fechaInicio;
+            double cantidadHoras = diferencia.TotalHours; // incluye minutos y segundos
+
+            // Calculamos el precio total (hora exacta)
+            decimal precioTotal = precioPorHora * (decimal)cantidadHoras;
+
+            return precioTotal;
+        }
 
     }
 }

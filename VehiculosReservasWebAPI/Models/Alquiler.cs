@@ -27,6 +27,8 @@ public partial class Alquiler
 
     public bool? Finalizado { get; set; }
 
+    public bool? Cancelado { get; set; }
+
     public virtual Cliente IdClienteNavigation { get; set; } = null!;
 
     public virtual Empleado IdEmpleadoNavigation { get; set; } = null!;

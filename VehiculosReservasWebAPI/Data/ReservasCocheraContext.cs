@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
-using VehiculosReservasWebAPI.Models;
 
-namespace VehiculosReservasWebAPI.Data;
+namespace VehiculosReservasWebAPI.Models;
 
 public partial class ReservasCocheraContext : DbContext
 {
@@ -40,9 +39,9 @@ public partial class ReservasCocheraContext : DbContext
 
     public virtual DbSet<Vehiculo> Vehiculos { get; set; }
 
-//    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-//#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-//        => optionsBuilder.UseSqlServer("Server=DESKTOP-UV8F7GP; Database=ReservasCochera; Trusted_Connection=True; TrustServerCertificate=True;");
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer("Server=DESKTOP-UV8F7GP; Database=ReservasCochera; Trusted_Connection=True; TrustServerCertificate=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -52,6 +51,7 @@ public partial class ReservasCocheraContext : DbContext
 
             entity.ToTable("Alquiler");
 
+            entity.Property(e => e.Cancelado).HasDefaultValue(false);
             entity.Property(e => e.Costo).HasColumnType("decimal(10, 2)");
             entity.Property(e => e.CostoRetraso)
                 .HasDefaultValue(0m)
