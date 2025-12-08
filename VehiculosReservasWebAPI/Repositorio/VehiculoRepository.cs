@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 using VehiculosReservasWebAPI.Models;
+using VehiculosReservasWebAPI.Models.Dto.DtoViews;
 using VehiculosReservasWebAPI.Repositorio.IRepositorio;
 using VehiculosReservasWebAPI.Services.IService;
 
@@ -64,6 +66,32 @@ namespace VehiculosReservasWebAPI.Repositorio
 
             // 1 - Disponible por defecto
             return await SetEstado(vehiculo, 1);
+        }
+
+        public async Task<IEnumerable<ListaVehiculoDto>> ListadoVehiculos()
+        {
+            var listado = await _context.Vehiculos
+                .Select(v => new ListaVehiculoDto
+                {
+                    IdVehiculo = v.IdVehiculo,
+                    Patente = v.Patente,
+                    Marca = v.IdMarcaNavigation.Nombre,
+                    Modelo = v.IdModeloNavigation.Nombre,
+                    Tipo = v.IdTipoNavigation.Descripcion,
+                    Estado = v.IdEstadoNavigation.Descripcion,
+                    Ano = v.Año,
+                    Color = v.Color,
+                    Kilometraje = v.Kilometraje ?? 0,
+                    Transmision = v.Transmision,
+                    Combustible = v.Combustible ?? "",
+                    CapacidadPasajeros = v.CapacidadPasajeros ?? 0,
+                    PrecioCompra = v.PrecioCompra ?? 0,
+                    Observaciones = v.Observaciones,
+                    FechaAlta = v.FechaAlta ?? DateOnly.MinValue,
+                    Habilitado = v.Habilitado ?? false
+                }).ToListAsync();
+
+            return listado;
         }
 
         public async Task ObtenerEstadoVehiculo(int idVehiculo)

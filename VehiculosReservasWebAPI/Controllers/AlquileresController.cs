@@ -136,7 +136,7 @@ namespace VehiculosReservasWebAPI.Controllers
         public async Task<IActionResult> EliminarAlquiler(int id)
         {
 
-            var alquilerOriginal = await _AlquilerService.ObtenerPorId(id);
+             var alquilerOriginal = await _AlquilerService.ObtenerPorId(id);
             bool tieneReservaFutura = _AlquilerRepository2.VehiculoTieneReservaFutura(alquilerOriginal.IdVehiculo,alquilerOriginal.FechaFin,alquilerOriginal.IdAlquiler);
 
             await _AlquilerService.Eliminar(id);
