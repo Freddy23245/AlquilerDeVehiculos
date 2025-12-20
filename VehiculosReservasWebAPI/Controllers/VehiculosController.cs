@@ -14,7 +14,6 @@ namespace VehiculosReservasWebAPI.Controllers
     public class VehiculosController : ControllerBase
     {
         private readonly IService<Vehiculo> _VehiculoService;
-        //private readonly IAlquilerRepository _AlquilerRepository2;
         private readonly IVehiculoRepository _VehiculoRepository;
         private readonly IMapper _mapper;
         public VehiculosController(IService<Vehiculo> VehiculoService, IMapper mapper, IVehiculoRepository VehiculoRepository)

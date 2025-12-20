@@ -19,6 +19,7 @@ namespace VehiculosReservasWebAPI.ReservasMappers
             CreateMap<Pago, PagoDto>().ReverseMap();
             CreateMap<Tipo, TipoDto>().ReverseMap();
             CreateMap<Vehiculo, VehiculoDto>().ReverseMap();
+            CreateMap<Empleado, UsuarioDatosDto>().ReverseMap();
         }
     }
 }
